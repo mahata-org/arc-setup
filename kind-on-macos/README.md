@@ -327,14 +327,15 @@ helm install arc-runner-set \
   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
 ```
 
-Wait until ARC has registered the scale set with GitHub and started its listener, then check the pods:
+Wait until ARC has registered the scale set with GitHub and its listener pod is running, then check the pods:
 
 ```bash
-kubectl wait --namespace arc-runners --for=jsonpath='{.status.phase}'=Running autoscalingrunnerset/arc-runner-set --timeout=5m
+kubectl wait --namespace arc-systems --for=create pod --selector actions.github.com/scale-set-name=arc-runner-set --timeout=5m
+kubectl wait --namespace arc-systems --for=condition=Ready pod --selector actions.github.com/scale-set-name=arc-runner-set --timeout=5m
 kubectl get pods --namespace arc-systems
 ```
 
-The scale set's phase becomes `Running` only after ARC has registered the scale set in your organization's **Default** runner group.
+ARC creates the listener pod only after it has registered the scale set in your organization's **Default** runner group.
 You should see the controller pod and a listener pod for `arc-runner-set`:
 
 ```text
@@ -448,7 +449,8 @@ helm install arc-runner-set-dind \
   --version "$ARC_VERSION" \
   --values "$HOME/arc-kind/arc-runner-set-dind.yaml" \
   oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
-kubectl wait --namespace arc-runners --for=jsonpath='{.status.phase}'=Running autoscalingrunnerset/arc-runner-set-dind --timeout=5m
+kubectl wait --namespace arc-systems --for=create pod --selector actions.github.com/scale-set-name=arc-runner-set-dind --timeout=5m
+kubectl wait --namespace arc-systems --for=condition=Ready pod --selector actions.github.com/scale-set-name=arc-runner-set-dind --timeout=5m
 ```
 
 Add a workflow with two jobs: one uses the Docker CLI directly, and one runs its steps in a container.
@@ -596,7 +598,7 @@ kubectl delete secret arc-github-app --namespace arc-runners
 
 Then run the `export` commands and the `kubectl create secret` command from [Step 7](#step-7-store-the-github-app-credentials-in-the-cluster) again with the right values.
 ARC retries every few seconds and picks up the new secret, so you don't need to reinstall anything.
-Run the `kubectl wait` command from [Step 8](#step-8-install-a-runner-scale-set) to check.
+Run the `kubectl wait` commands from [Step 8](#step-8-install-a-runner-scale-set) to check.
 
 To fix `githubConfigUrl`, edit the file and apply it with `helm upgrade`, as in [Change the number of runners](#change-the-number-of-runners).
 
