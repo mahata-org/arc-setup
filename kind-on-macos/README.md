@@ -91,8 +91,9 @@ This guide uses these names:
 
 > [!WARNING]
 > Self-hosted runners run your workflows' code on your Mac.
-> This guide registers the runners for private repositories only.
 > Don't make them available to public repositories: anyone who can open a pull request could run code on your machine.
+> This guide registers the runners in your organization's **Default** runner group, which serves only private repositories unless an owner has changed it.
+> [Step 8](#step-8-install-a-runner-scale-set) has you check that setting before you install the runners.
 
 ## Step 1: Install the tools
 
@@ -114,16 +115,24 @@ helm version
 gh --version
 ```
 
-Check that the GitHub CLI is signed in:
+The GitHub CLI creates the demo repository and its workflow files in Step 9.
+Adding workflow files needs the `workflow` scope, which `gh auth login` doesn't always request.
+Check your login and its scopes:
 
 ```bash
 gh auth status
 ```
 
-If it says you aren't logged in, sign in and follow the prompts:
+If you aren't logged in, log in with the `workflow` scope and follow the prompts:
 
 ```bash
-gh auth login
+gh auth login --hostname github.com --scopes workflow
+```
+
+If you're logged in but `Token scopes` doesn't include `'workflow'`, add the scope:
+
+```bash
+gh auth refresh --hostname github.com --scopes workflow
 ```
 
 ## Step 2: Set variables
@@ -303,7 +312,22 @@ You should see `github_app_id`, `github_app_installation_id`, and `github_app_pr
 ## Step 8: Install a runner scale set
 
 A runner scale set is a group of runners that ARC creates on demand.
-Write its Helm values to a file.
+ARC registers it in your organization's **Default** runner group.
+
+First, make sure that the Default group doesn't serve public repositories.
+Open your organization's runner groups:
+
+```bash
+open "https://github.com/organizations/${GITHUB_ORG}/settings/actions/runner-groups"
+```
+
+Click **Default**, and check that **Allow public repositories** isn't selected.
+If it's selected, clear it and click **Save group**.
+If public repositories must keep using the Default group, don't use it for ARC.
+Instead, create a separate runner group that only private repositories can use (this needs the GitHub Team plan or higher), and add `runnerGroup: "<group name>"` to the values file below.
+See [Managing access to self-hosted runners using groups](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/manage-access).
+
+Write the scale set's Helm values to a file.
 `minRunners: 0` means no runner pods exist until a job arrives, and `maxRunners: 3` caps how many jobs run at once.
 
 ```bash
@@ -606,7 +630,7 @@ To fix `githubConfigUrl`, edit the file and apply it with `helm upgrade`, as in 
 
 - The workflow's `runs-on` must be exactly the scale set name, such as `arc-runner-set`.
 - The repository must be allowed to use the runner group.
-  The **Default** group doesn't serve public repositories.
+  With the setting that you checked in Step 8, the **Default** group doesn't serve public repositories.
   Check **Settings** > **Actions** > **Runner groups** in your organization.
 - Check that the listener is running: `kubectl get pods --namespace arc-systems`.
 
