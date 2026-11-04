@@ -270,6 +270,19 @@ You'll collect three things in this step: the **App ID**, a **private key** file
 7. **Installation ID:** after the installation, your browser shows a URL like `https://github.com/organizations/<your-org>/settings/installations/12345678`.
    Copy the number at the end.
 
+### Find the IDs again later
+
+You can find the IDs again in your organization's settings:
+
+1. On GitHub, click your profile picture, then **Your organizations**.
+   Click **Settings** next to your organization.
+2. For the **App ID**, click **Developer settings** > **GitHub Apps** in the sidebar, then click **Edit** next to your app.
+   Copy the number next to **App ID**, not **Client ID**.
+3. For the **installation ID**, return to your organization's **Settings**.
+   Under **Third-party Access** in the sidebar, click **GitHub Apps**, then click **Configure** next to your app.
+   Copy the number at the end of the browser URL, as in item 7 above.
+   If the app isn't listed, install it in your organization as described in item 6 above.
+
 ## Step 7: Store the GitHub App credentials in the cluster
 
 Replace the two numbers with your **App ID** and **installation ID** from Step 6.
