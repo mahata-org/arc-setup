@@ -256,8 +256,8 @@ You'll collect three things in this step: the **App ID**, a **private key** file
 5. **Private key:** scroll down to **Private keys** and click **Generate a private key**.
    Your browser downloads a file named like `arc-kind-<your-org>.<date>.private-key.pem` to `~/Downloads`.
 6. In the left sidebar, click **Install App**, then click **Install** next to your organization.
-   Select **All repositories** and click **Install**.
-   The app has no repository permissions besides read-only metadata, so this doesn't give it access to your code.
+   Select **All repositories**, or **Only select repositories** with any repository, and click **Install**.
+   ARC uses only the app's organization permission, so the repository choice doesn't matter, and the app gets no access to your code.
 7. **Installation ID:** after the installation, your browser shows a URL like `https://github.com/organizations/<your-org>/settings/installations/12345678`.
    Copy the number at the end.
 
